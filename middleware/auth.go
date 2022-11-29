@@ -1,19 +1,16 @@
 package middleware
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	"message-board/util"
 	"net/http"
 )
 
-const ctxUser string = "uid"
+const CtxUser string = "uid"
 
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		Username, err := c.Cookie("name")
-		fmt.Println(Username)
 		if err != nil {
 			if err != http.ErrNoCookie {
 				util.NormError(c, 300, "未登录")
@@ -25,8 +22,7 @@ func Auth() gin.HandlerFunc {
 				return
 			}
 		}
-		log.Println(Username)
-		c.Set(ctxUser, Username)
+		c.Set(CtxUser, Username)
 		c.Next()
 		return
 	}

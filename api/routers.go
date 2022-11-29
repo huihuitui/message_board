@@ -19,7 +19,7 @@ func InitRouter() {
 		m.GET("/message", GetMessage)
 		m.POST("/message", SendMessage)
 		m.PUT("/message")
-		m.DELETE("/message")
+		m.DELETE("/message", DeleteMessage)
 	}
 	r.Run()
 }

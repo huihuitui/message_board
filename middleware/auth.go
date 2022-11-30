@@ -12,8 +12,8 @@ func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		Username, err := c.Cookie("name")
 		if err != nil {
-			if err != http.ErrNoCookie {
-				util.NormError(c, 300, "未登录")
+			if err == http.ErrNoCookie {
+				util.NormError(c, 300, "未登录或者未注册")
 				c.Abort()
 				return
 			} else {

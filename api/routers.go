@@ -16,9 +16,11 @@ func InitRouter() {
 	m := r.Group("/message")
 	{
 		m.Use(middleware.Auth())
-		m.GET("/message", GetMessage)
+		m.GET("/message", GetMessage)        //查看所有留言板
+		m.GET("/comment", GetComment)        //查看一个留言及其评论
+		m.GET("/altermessage", AlterMessage) //用户先查看自己所有评论，根据评论内容修改某一条评论
 		m.POST("/message", SendMessage)
-		m.PUT("/message")
+		m.PUT("/message", ModifyMessage)
 		m.DELETE("/message", DeleteMessage)
 	}
 	r.Run()

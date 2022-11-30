@@ -15,7 +15,37 @@ import (
 )
 
 func GetMessage(c *gin.Context) {
-	c.PostForm("mid")
+	_, b := c.Get(middleware.CtxUser)
+	if b != true {
+		fmt.Println("未得到uid")
+		return
+	}
+	m, err := service.Get()
+	if err != nil {
+		log.Printf("error:%v", err)
+		util.NormError(c, 20002, "获取失败")
+		return
+	}
+	for _, v := range m {
+		c.JSON(200, v)
+	}
+}
+func GetComment(c *gin.Context) {
+	_, b := c.Get(middleware.CtxUser)
+	if b != true {
+		fmt.Println("未得到uid")
+		return
+	}
+	userName := c.Query("re_uid")
+	m, err := service.GetComment(userName)
+	if err != nil {
+		log.Printf("error:%v", err)
+		util.NormError(c, 20002, "获取失败")
+		return
+	}
+	for _, v := range m {
+		c.JSON(200, v)
+	}
 }
 func SendMessage(c *gin.Context) {
 	userName, b := c.Get(middleware.CtxUser)
@@ -29,7 +59,7 @@ func SendMessage(c *gin.Context) {
 		util.ResParamError(c)
 		return
 	}
-	_, err := service.SearchUserByName(recUid)
+	m, err := service.SearchUserByName(recUid)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			util.NormError(c, 300, "用户不存在")
@@ -41,6 +71,7 @@ func SendMessage(c *gin.Context) {
 		return
 	}
 	err = service.Comment(model.Message{
+		UID:      m.ID,
 		SendName: userName.(string),
 		RecUName: recUid,
 		Detail:   detail,
@@ -48,7 +79,39 @@ func SendMessage(c *gin.Context) {
 	})
 	if err != nil {
 		log.Printf("error:%v", err)
-		util.RespInternalError(c)
+		util.NormError(c, 20004, "评论失败")
+		return
+	}
+	util.ResOk(c)
+}
+func AlterMessage(c *gin.Context) {
+	userName, b := c.Get(middleware.CtxUser)
+	if b != true {
+		fmt.Println("未得到uid")
+		return
+	}
+	m, err := service.GetUserMessage(userName.(string))
+	if err != nil {
+		log.Printf("error:%v", err)
+		util.NormError(c, 20004, "获取失败")
+		return
+	}
+	for _, v := range m {
+		c.JSON(200, v)
+	}
+}
+func ModifyMessage(c *gin.Context) {
+	userName, b := c.Get(middleware.CtxUser)
+	if b != true {
+		fmt.Println("未得到uid")
+		return
+	}
+	newDetail := c.PostForm("newDetail")
+	detail := c.PostForm("detail")
+	err := service.ModifyMessage(userName.(string), newDetail, detail)
+	if err != nil {
+		log.Printf("error:%v", err)
+		util.NormError(c, 20003, "修改失败")
 		return
 	}
 	util.ResOk(c)
@@ -62,7 +125,7 @@ func DeleteMessage(c *gin.Context) {
 	err := service.Delete(userName.(string))
 	if err != nil {
 		log.Printf("error:%v", err)
-		util.RespInternalError(c)
+		util.NormError(c, 20002, "删除失败")
 		return
 	}
 	util.ResOk(c)

@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"message-board/middleware"
@@ -19,6 +20,7 @@ func Register(c *gin.Context) {
 	}
 	u, err := service.SearchUserByName(userName)
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Printf("errererer:%v", err)
 		util.RespInternalError(c)
 		return
 	}
@@ -31,6 +33,7 @@ func Register(c *gin.Context) {
 		Password: password,
 	})
 	if err != nil {
+		log.Printf("Encrypt failed:%v", err)
 		util.RespInternalError(c)
 		return
 	}
@@ -55,7 +58,13 @@ func Login(c *gin.Context) {
 		}
 		return
 	}
-	if u.UserName != userName {
+	enRes, err := util.Encrypt(password)
+	if err != nil {
+		log.Printf("Encrypt failed:%v", err)
+		util.RespInternalError(c)
+		return
+	}
+	if u.Password != enRes {
 		util.NormError(c, 20001, "密码错误")
 		return
 	}
@@ -65,5 +74,5 @@ func Login(c *gin.Context) {
 		util.NormError(c, 200, "获取token失败")
 		return
 	}
-	util.NormError(c, 200, token)
+	util.RspToken(c, 200, token)
 }

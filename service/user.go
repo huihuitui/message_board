@@ -3,9 +3,11 @@ package service
 import (
 	"message-board/dao"
 	"message-board/model"
+	"message-board/util"
 )
 
 func CreateUser(u model.User) (err error) {
+	u.Password, err = util.Encrypt(u.Password)
 	err = dao.InsertUser(u)
 	return
 }

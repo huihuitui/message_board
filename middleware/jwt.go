@@ -9,8 +9,6 @@ import (
 
 const TokenExpireDuration = time.Hour * 24
 
-var myKey = []byte("huihuitui")
-
 func GenRegisteredClaims(username string) (string, error) {
 	// 创建 Claims
 	claims := model.MyClaims{
@@ -25,13 +23,13 @@ func GenRegisteredClaims(username string) (string, error) {
 	// 生成token对象
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// 生成签名字符串
-	return token.SignedString(myKey)
+	return token.SignedString(model.MyKey)
 }
 func ParesToken(tokenString string) (*model.MyClaims, error) {
 	// 解析token
 	mc := new(model.MyClaims)
 	token, err := jwt.ParseWithClaims(tokenString, mc, func(token *jwt.Token) (interface{}, error) {
-		return myKey, nil
+		return model.MyKey, nil
 	})
 	if err != nil { // 解析token失败
 		return nil, err

@@ -42,3 +42,9 @@ func NormError(c *gin.Context, status int, info string) {
 		"Info":   info,
 	})
 }
+func RspToken(c *gin.Context, status int, info string) {
+	c.JSON(http.StatusBadRequest, gin.H{
+		"status": status,
+		"token":  info,
+	})
+}

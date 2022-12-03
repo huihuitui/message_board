@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
 	"log"
+	"message-board/middleware"
 	"message-board/model"
 	"message-board/service"
 	"message-board/util"
@@ -58,6 +59,11 @@ func Login(c *gin.Context) {
 		util.NormError(c, 20001, "密码错误")
 		return
 	}
-	c.SetCookie("name", userName, 1110, "/", "localhost", false, true)
-	util.ResOk(c)
+	token, err := middleware.GenRegisteredClaims(userName)
+	if err != nil {
+		log.Printf("get jwt failed:%v", err)
+		util.NormError(c, 200, "获取token失败")
+		return
+	}
+	util.NormError(c, 200, token)
 }
